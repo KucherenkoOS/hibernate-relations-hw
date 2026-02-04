@@ -5,8 +5,8 @@ import mate.academy.hibernate.relations.dao.ActorDao;
 import mate.academy.hibernate.relations.exception.DataProcessingException;
 import mate.academy.hibernate.relations.model.Actor;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 
 public class ActorDaoImpl extends AbstractDao implements ActorDao {
 
@@ -17,7 +17,9 @@ public class ActorDaoImpl extends AbstractDao implements ActorDao {
     @Override
     public Actor add(Actor actor) {
         Transaction transaction = null;
-        try (Session session = factory.openSession()) {
+        Session session = null;
+        try {
+            session = factory.openSession();
             transaction = session.beginTransaction();
             session.save(actor);
             transaction.commit();
@@ -27,6 +29,10 @@ public class ActorDaoImpl extends AbstractDao implements ActorDao {
                 transaction.rollback();
             }
             throw new DataProcessingException("Can't insert actor " + actor, e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
         }
     }
 
